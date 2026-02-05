@@ -7,7 +7,7 @@ batch = db.batch()
 
 def get_all_movies():
     try:
-        movies = [doc.to_dict() for doc in db.collection("movies").stream()]
+        movies = [doc.to_dict() for doc in db.collection("justwatch_movies").stream()]
         return {
             "status": "success",
             "count": len(movies),
@@ -121,15 +121,21 @@ def get_popular_movies():
             # print("url is:", m_url)
             # print("platdform is",m_platform)
         movies.append({
-            'type_name': type_node, 
-            'poster_url': m_posterUrl,
-            'runtime': m_runtime,
+            'id' : m_id,
+            'title' : m_title,
             'rating': m_rating,
             'description' : m_description,
-            'title' : m_title,
-            'id' : m_id,
-            'url' : m_url,
-            'platform' : m_platform})
+            'quality' : "4k",
+            'year': "2025",
+            'genre': [],
+            'cast': [],
+            'poster_url': m_posterUrl,
+            'trailer_url' : "",
+            'runtime': m_runtime,
+            'movie_url' : m_url,
+            'platform' : m_platform,
+            'type_name': type_node, 
+            })
     for movie in movies:
         doc_ref = db.collection("justwatch_movies").document(movie["id"])
         # doc = doc_ref.get()
@@ -148,7 +154,8 @@ def get_popular_movies():
     return {
         "status": "success",
         "inserted" : insert_count,
-         "total" : len(movies) 
+         "total" : len(movies) ,
+         "movies": movies
         }
     # return api_response 
 

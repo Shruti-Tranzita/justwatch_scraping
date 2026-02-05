@@ -21,6 +21,8 @@ from firebase_admin import initialize_app
 from router.health import health_check
 from db import db
 from router.movies import get_popular_movies
+from router.movies import get_all_movies
+from router.movies import get_movie_year
 
 # Initialize Firebase Admin SDK
 
@@ -35,6 +37,9 @@ def api(req):
 
     if path == "/health_check" and method == "GET":
         return health_check()
+    
+    if path == "/get_all_movies" and method == "GET":
+        return get_all_movies()
     
     if path == '/trigger/get_popular_movies' and method == 'GET':
         return get_popular_movies()
