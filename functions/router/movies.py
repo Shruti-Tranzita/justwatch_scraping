@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 import json
 from db import getdb
@@ -109,7 +110,7 @@ def get_popular_movies():
         m_title = content_node.get('title')
         # print("title is:",m_title)
         m_id = node.get('id')
-        print("id is:", m_id)
+        # print("id is:", m_id)
         url = node.get('watchNowOffer', {'standardWebURL': None})
         # print("url is", url)
         if(url != None):
@@ -120,6 +121,15 @@ def get_popular_movies():
                 m_platform = None
             # print("url is:", m_url)
             # print("platdform is",m_platform)
+        watch_links = {
+            "IMDB" : "",
+            "OTT" : [],
+        }
+        if m_url and m_platform:
+            watch_links["OTT"].append({
+                "platform" : m_platform,
+                "url" : m_url,
+            })
         movies.append({
             'id' : m_id,
             'title' : m_title,
@@ -131,11 +141,13 @@ def get_popular_movies():
             'cast': [],
             'poster_url': m_posterUrl,
             'trailer_url' : "",
+            # 'movie_url' : m_url,
+            # 'platform' : m_platform,
+            'watchLinks' : watch_links,
+            'lastUpdated': datetime.utcnow().isoformat() + "Z",
             'runtime': m_runtime,
-            'movie_url' : m_url,
-            'platform' : m_platform,
             'type_name': type_node, 
-            })
+        })
     for movie in movies:
         doc_ref = db.collection("justwatch_movies").document(movie["id"])
         # doc = doc_ref.get()

@@ -38,7 +38,7 @@ def api(req):
     if path == "/health_check" and method == "GET":
         return health_check()
     
-    if path == "/get_all_movies" and method == "GET":
+    if path == "movies/get_all" and method == "GET":
         return get_all_movies()
     
     if path == '/trigger/get_popular_movies' and method == 'GET':
