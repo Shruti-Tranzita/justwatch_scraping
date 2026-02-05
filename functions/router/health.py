@@ -2,10 +2,12 @@ from datetime import datetime
 # from firebase_admin import initialize_app, firestore
 # initialize_app()
 # db = firestore.client()
-from db import db
+from db import getdb
+
 
 def health_check():
     try:
+        db = getdb()
         db.collection("_health").document("ping").set({
             "timestamp": datetime.utcnow().isoformat()
         })
