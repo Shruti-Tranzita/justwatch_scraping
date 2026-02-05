@@ -3,6 +3,7 @@ import json
 from db import getdb
 
 db = getdb()
+batch = db.batch()
 
 def get_all_movies():
     try:
@@ -84,6 +85,7 @@ def get_popular_movies():
     # # here you need to process it and save in db
     
     movies = []
+    insert_count = 0
     edges = api_response.get('data', {}).get('popularTitles', {}).get('edges', [])
     # .get('popularTitles', {}).get('edges', [])
     # if '__typename' in edges:
@@ -91,7 +93,8 @@ def get_popular_movies():
     #     # for edge in response_item:
     #     #     node = edge.get('node', {})
     for edge in edges:
-        node = edge.get('node', [])
+        node = edge.get('node', {})
+        # print(node)
         type_node = node.get('__typename')
         # print("typename is:",type_node)
         content_node = node.get('content', {})
@@ -105,8 +108,8 @@ def get_popular_movies():
         # print("description is:", m_description)
         m_title = content_node.get('title')
         # print("title is:",m_title)
-        m_id = content_node.get('id')
-        # print("id is:", m_id)
+        m_id = node.get('id')
+        print("id is:", m_id)
         url = node.get('watchNowOffer', {'standardWebURL': None})
         # print("url is", url)
         if(url != None):
@@ -128,9 +131,27 @@ def get_popular_movies():
             'url' : m_url,
             'platform' : m_platform})
     for movie in movies:
-        db.collection("justwatch_movies").add(movie)   
-    # db.collection("justwatch_movies").add(movies)    
-    return movies  
+        doc_ref = db.collection("justwatch_movies").document(movie["id"])
+        # doc = doc_ref.get()
+        if doc_ref.get().exists:
+            # print("movie already exits in the db")
+            continue
+        batch.set(doc_ref, movie)
+        insert_count += 1
+        # doc_ref.set(movie)
+        # print("inserted")
+        # db.collection("justwatch_movies").add(movie)  
+        # print(db.collection("justwatch_movies").count()) 
+    # db.collection("justwatch_movies").add(movies) 
+    if insert_count > 0:
+        batch.commit()   
+    return {
+        "status": "success",
+        "inserted" : insert_count,
+         "total" : len(movies) 
+        }
+    # return api_response 
+
 
 def get_movie_year():
     
@@ -157,9 +178,12 @@ def get_movie_year():
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-
-    print(response.text)
+    # print(response.text)
+    
     api_response = json.loads(response.text)
+    edges = api_response.get('data', {}).get('urlV2', {}).get('node', {})
+    for value in edges.get("seasons", []):
+        print(value["content"]["originalReleaseYear"])
     return api_response
 
     
